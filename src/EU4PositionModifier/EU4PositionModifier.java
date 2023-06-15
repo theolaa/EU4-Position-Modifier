@@ -35,6 +35,10 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 public class EU4PositionModifier {
 
+	private static enum Operation {
+		ABSOLUTE, RELATIVE
+	}
+
 	private static JFrame f = new JFrame();
 	private static GridBagConstraints c = new GridBagConstraints();
 	private static JTextArea status = new JTextArea();
@@ -88,6 +92,35 @@ public class EU4PositionModifier {
 			startButton.setEnabled(false);
 		}
 		return result;
+	}
+
+	static float modifyValue(float value, float offset, Operation operation) {
+		switch (operation) {
+		case ABSOLUTE: {
+			return value + offset;
+		}
+		case RELATIVE: {
+			return value * offset;
+		}
+		default:
+			return value;
+		}
+	}
+
+	static void saveFile(ParadoxScriptFile f, int saveMethod, File outputFolder) {
+		switch (saveMethod) {
+		case 0:
+			f.saveDirect();
+			break;
+		case 1:
+			f.saveDirectWithBackup();
+			break;
+		case 2:
+			f.saveToSeparateFolder(outputFolder);
+			break;
+		default:
+			updateStatus("Invalid save method selected: " + saveMethod);
+		}
 	}
 
 	private static void createAndShowGUI() {
@@ -181,8 +214,8 @@ public class EU4PositionModifier {
 		JSpinner offsetSettingsYSpinner = new JSpinner(offsetSettingsYSpinnerModel);
 		JLabel offsetSettingsZLabel = new JLabel("Z: ");
 		JSpinner offsetSettingsZSpinner = new JSpinner(offsetSettingsZSpinnerModel);
-		
-		JComboBox<String> selectOperation = new JComboBox<String>(new String[] {"Absolute", "Relative"});
+
+		JComboBox<String> selectOperation = new JComboBox<String>(new String[] { "Absolute", "Relative" });
 		selectOperation.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -198,6 +231,24 @@ public class EU4PositionModifier {
 			}
 		});
 
+		JLabel saveMethodLabel = new JLabel("Save Method");
+		JComboBox<String> selectSaveMethod = new JComboBox<String>(
+				new String[] { "Overwrite", "Overwrite with backup", "Separate output folder" });
+		selectSaveMethod.setSelectedIndex(2);
+		selectSaveMethod.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// Save to output folder
+				if (selectSaveMethod.getSelectedIndex() == 2) {
+					selectOutputDirectory.setEnabled(true);
+					openSelectDirectoryDialgogue.setEnabled(true);
+				} else {
+					selectOutputDirectory.setEnabled(false);
+					openSelectDirectoryDialgogue.setEnabled(false);
+				}
+			}
+		});
+
 		JLabel instructions = new JLabel(
 				"<html><b>Instructions</b><br/>The following is Paradox's doing, not mine.<ul><li>-X: Moves things left</li><li>+X: Moves things right</li><li>-Y: Moves things lower to the map's surface (only for ambient objects)</li><li>+Y: Moves things higher above the map's surface (only for ambient objects)</li><li>-Z: Moves things down</li><li>+Z: Moves things up</li></ul><html>");
 
@@ -205,22 +256,34 @@ public class EU4PositionModifier {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				long startTime = System.currentTimeMillis();
+
+				int saveMethod = selectSaveMethod.getSelectedIndex();
+
 				modFolder = new File(inputFolder, ((ComboBoxOption) selectMod.getSelectedItem()).getValue());
 				outputFolder = new File(selectOutputDirectory.getText());
 				emptyFolder(outputFolder);
-				outputFolder.mkdir();
-				openOutputDirectory.setEnabled(true);
+				if (saveMethod == 2) {
+					outputFolder.mkdir();
+					openOutputDirectory.setEnabled(true);
+				}
 
-				boolean absoluteOperation = "Absolute".equals(selectOperation.getSelectedItem().toString());
-				
+				Operation operation;
+				if ("Absolute".equals(selectOperation.getSelectedItem().toString())) {
+					operation = Operation.ABSOLUTE;
+				} else {
+					operation = Operation.RELATIVE;
+				}
+
 				Float xOffset = Float.parseFloat(offsetSettingsXSpinner.getValue().toString());
 				Float yOffset = Float.parseFloat(offsetSettingsYSpinner.getValue().toString());
 				Float zOffset = Float.parseFloat(offsetSettingsZSpinner.getValue().toString());
-				
+
 				// Process Positions
 				if (positionsCheckbox.isSelected()) {
 					if (new File(modFolder, "map/positions.txt").exists()) {
-						new File(outputFolder, "map").mkdir();
+						if (saveMethod == 2) {
+							new File(outputFolder, "map").mkdir();
+						}
 						ParadoxScriptFile positionsFile = new ParadoxScriptFile(
 								new File(modFolder, "map/positions.txt"));
 						for (ParadoxScriptNode province : positionsFile.getRootNode().getChildren()) {
@@ -232,23 +295,15 @@ public class EU4PositionModifier {
 									ParadoxScriptNode valueNode = positions.getChildren().get(i);
 									float value = Float.parseFloat(valueNode.getIdentifier());
 									if (i % 2 == 0) {
-										if (absoluteOperation) {
-											value += xOffset;
-										} else {
-											value *= xOffset;
-										}
+										value = modifyValue(value, xOffset, operation);
 									} else {
-										if (absoluteOperation) {
-											value += zOffset;
-										} else {
-											value *= zOffset;
-										}
+										value = modifyValue(value, zOffset, operation);
 									}
 									valueNode.setIdentifier(Float.toString(value));
 								}
 							}
 						}
-						positionsFile.saveToSeparateFolder(new File(outputFolder, "map"));
+						saveFile(positionsFile, saveMethod, new File(outputFolder, "map"));
 					} else {
 						updateStatus("No file found at map/positions.txt");
 					}
@@ -257,13 +312,15 @@ public class EU4PositionModifier {
 				// Process Trade Nodes
 				if (tradeNodesCheckbox.isSelected()) {
 					if (new File(modFolder, "common/tradenodes").exists()) {
-						new File(outputFolder, "common/tradenodes").mkdirs();
+						if (saveMethod == 2) {
+							new File(outputFolder, "common/tradenodes").mkdirs();
+						}
 						for (File f : new File(modFolder, "common/tradenodes").listFiles()) {
 							ParadoxScriptFile tradeNodesFile = new ParadoxScriptFile(f);
 							for (ParadoxScriptNode node : tradeNodesFile.getRootNode().getChildren()) {
 
 							}
-							tradeNodesFile.saveToSeparateFolder(new File(outputFolder, "common/tradenodes"));
+							saveFile(tradeNodesFile, saveMethod, new File(outputFolder, "common/tradenodes"));
 						}
 					} else {
 						updateStatus("No files found at common/tradenodes");
@@ -273,13 +330,15 @@ public class EU4PositionModifier {
 				// Process Ambient Objects
 				if (ambientObjectsCheckbox.isSelected()) {
 					if (new File(modFolder, "map/ambient_object.txt").exists()) {
-						new File(outputFolder, "map").mkdir();
+						if (saveMethod == 2) {
+							new File(outputFolder, "map").mkdir();
+						}
 						ParadoxScriptFile ambientObjectsFile = new ParadoxScriptFile(
 								new File(modFolder, "map/ambient_object.txt"));
 						for (ParadoxScriptNode node : ambientObjectsFile.getRootNode().getChildren()) {
 
 						}
-						ambientObjectsFile.saveToSeparateFolder(new File(outputFolder, "map"));
+						saveFile(ambientObjectsFile, saveMethod, new File(outputFolder, "map"));
 					} else {
 						updateStatus("No file found at map/ambient_object.txt");
 					}
@@ -362,15 +421,24 @@ public class EU4PositionModifier {
 		c.weightx = 1;
 		topbar.add(offsetSettingsArea, c);
 
-		// Instructions
+		// Save method
 		c.gridx = 0;
 		c.gridy = 5;
+		c.weightx = 0;
+		topbar.add(saveMethodLabel, c);
+		c.gridx = 1;
+		c.weightx = 1;
+		topbar.add(selectSaveMethod, c);
+
+		// Instructions
+		c.gridx = 0;
+		c.gridy = 6;
 		c.gridwidth = 3;
 		topbar.add(instructions, c);
 
 		// Add Start Button
 		c.gridx = 0;
-		c.gridy = 6;
+		c.gridy = 7;
 		c.weightx = 1;
 		topbar.add(startButton, c);
 
