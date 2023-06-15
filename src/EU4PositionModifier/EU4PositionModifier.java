@@ -230,6 +230,8 @@ public class EU4PositionModifier {
 				}
 			}
 		});
+		
+		JCheckBox wrapOutOfBounds = new JCheckBox("Wrap out-of-bounds points");
 
 		JLabel saveMethodLabel = new JLabel("Save Method");
 		JComboBox<String> selectSaveMethod = new JComboBox<String>(
@@ -248,7 +250,7 @@ public class EU4PositionModifier {
 				}
 			}
 		});
-
+		
 		JLabel instructions = new JLabel(
 				"<html><b>Instructions</b><br/>The following is Paradox's doing, not mine.<ul><li>-X: Moves things left</li><li>+X: Moves things right</li><li>-Y: Moves things lower to the map's surface (only for ambient objects)</li><li>+Y: Moves things higher above the map's surface (only for ambient objects)</li><li>-Z: Moves things down</li><li>+Z: Moves things up</li></ul><html>");
 
@@ -416,6 +418,7 @@ public class EU4PositionModifier {
 		offsetSettingsArea.add(offsetSettingsZLabel);
 		offsetSettingsArea.add(offsetSettingsZSpinner);
 		offsetSettingsArea.add(selectOperation);
+		offsetSettingsArea.add(wrapOutOfBounds);
 		c.gridx = 1;
 		c.gridy = 4;
 		c.weightx = 1;
@@ -429,17 +432,18 @@ public class EU4PositionModifier {
 		c.gridx = 1;
 		c.weightx = 1;
 		topbar.add(selectSaveMethod, c);
-
-		// Instructions
-		c.gridx = 0;
-		c.gridy = 6;
-		c.gridwidth = 3;
-		topbar.add(instructions, c);
+		
+//		// Instructions
+//		c.gridx = 0;
+//		c.gridy = 7;
+//		c.gridwidth = 3;
+//		topbar.add(instructions, c);
 
 		// Add Start Button
 		c.gridx = 0;
 		c.gridy = 7;
 		c.weightx = 1;
+		c.gridwidth = 3;
 		topbar.add(startButton, c);
 
 		// Controls
@@ -448,8 +452,8 @@ public class EU4PositionModifier {
 		// Status Bar
 		f.add(scrollPane, BorderLayout.CENTER);
 
-		f.setPreferredSize(new Dimension(1000, 600));
-		f.setMinimumSize(new Dimension(950, 450));
+		f.setPreferredSize(new Dimension(1100, 600));
+		f.setMinimumSize(new Dimension(1100, 450));
 		f.pack();
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
