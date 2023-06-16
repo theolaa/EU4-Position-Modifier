@@ -50,7 +50,7 @@ public class EU4PositionModifier {
 	private static File outputFolder;
 
 	public static String modName;
-	public static final String defaultOutputDirectory = System.getProperty("user.home") + "\\Desktop\\PDXSP Output\\";
+	public static final String defaultOutputDirectory = new File(System.getProperty("user.home") + "/Desktop/PDXSP Output/").toString();
 
 	public static void main(String[] args) {
 		String gameName;
@@ -72,7 +72,7 @@ public class EU4PositionModifier {
 	private static ComboBoxOption[] getModPaths() {
 		ArrayList<ComboBoxOption> modPaths = new ArrayList<ComboBoxOption>();
 		for (File f : inputFolder.listFiles()) {
-			if (f.isDirectory()) {
+			if (f.isDirectory() && new File(f, "/descriptor.mod").exists()) {
 				String folder = f.getName();
 				ParadoxScriptFile descriptor = new ParadoxScriptFile(new File(f, "/descriptor.mod"));
 				String name;
@@ -224,6 +224,8 @@ public class EU4PositionModifier {
 		JCheckBox positionsCheckbox = new JCheckBox("Positions", true);
 		JCheckBox tradeNodesCheckbox = new JCheckBox("Trade Nodes", true);
 		JCheckBox ambientObjectsCheckbox = new JCheckBox("Ambient Objects", true);
+		JCheckBox adjacenciesCheckbox = new JCheckBox("Adjacencies", true);
+		JCheckBox lakesCheckbox = new JCheckBox("Lakes", true);
 
 		JLabel offsetSettingsLabel = new JLabel("Adjust Positions By: ");
 		JPanel offsetSettingsArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -350,6 +352,36 @@ public class EU4PositionModifier {
 						updateStatus("No file found at map/ambient_object.txt");
 					}
 				}
+
+				// Process Adjacencies
+				if (adjacenciesCheckbox.isSelected()) {
+					if (new File(modFolder, "map/adjacencies.csv").exists()) {
+						if (saveMethod == 2) {
+							new File(outputFolder, "map").mkdir();
+						}
+						// TODO
+					} else {
+						updateStatus("No file found at map/adjacencies.csv");
+					}
+				}
+
+				// Process Lakes
+				if (lakesCheckbox.isSelected()) {
+					if (new File(modFolder, "map/lakes").exists()) {
+						if (saveMethod == 2) {
+							new File(outputFolder, "map/lakes").mkdirs();
+						}
+						for (File f : new File(modFolder, "map/lakes").listFiles()) {
+							ParadoxScriptFile lakesFile = new ParadoxScriptFile(f);
+							for (ParadoxScriptNode node : lakesFile.getRootNode().getChildren()) {
+
+							}
+							saveFile(lakesFile, saveMethod, new File(outputFolder, "map/lakes"));
+						}
+					} else {
+						updateStatus("No files found at map/lakes");
+					}
+				}
 				updateStatus("\nCompleted in " + (System.currentTimeMillis() - startTime) + "ms");
 				updateStatus("\n============================================================");
 			}
@@ -408,6 +440,8 @@ public class EU4PositionModifier {
 		filesToEditxArea.add(positionsCheckbox);
 		filesToEditxArea.add(tradeNodesCheckbox);
 		filesToEditxArea.add(ambientObjectsCheckbox);
+//		filesToEditxArea.add(adjacenciesCheckbox);
+//		filesToEditxArea.add(lakesCheckbox);
 		c.gridx = 1;
 		c.gridy = 3;
 		c.weightx = 1;
