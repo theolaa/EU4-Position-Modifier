@@ -437,7 +437,8 @@ public class EU4PositionModifier {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					Desktop.getDesktop().browse(new URL("https://github.com/theolaa/EU4-Position-Modifier/blob/master/README.md").toURI());
+					Desktop.getDesktop().browse(
+							new URL("https://github.com/theolaa/EU4-Position-Modifier/blob/master/README.md").toURI());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -527,12 +528,6 @@ public class EU4PositionModifier {
 		c.gridy = 4;
 		c.weightx = 1;
 		topbar.add(offsetSettingsArea, c);
-
-//		// Instructions
-//		c.gridx = 0;
-//		c.gridy = 7;
-//		c.gridwidth = 3;
-//		topbar.add(instructions, c);
 
 		// Add Start Button
 		c.gridx = 0;
