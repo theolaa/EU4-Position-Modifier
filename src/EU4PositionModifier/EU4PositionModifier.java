@@ -39,10 +39,11 @@ public class EU4PositionModifier {
 	private static enum Operation {
 		SHIFT, SCALE
 	}
-	
+
 	private static JFrame f = new JFrame();
 	private static GridBagConstraints c = new GridBagConstraints();
 	private static JTextArea status = new JTextArea();
+	private static JCheckBox wrapOutOfBounds;
 	private static JButton startButton;
 
 	private static File inputFolder;
@@ -50,7 +51,8 @@ public class EU4PositionModifier {
 	private static File outputFolder;
 
 	public static String modName;
-	public static final String defaultOutputDirectory = new File(System.getProperty("user.home") + "/Desktop/PDXSP Output/").toString();
+	public static final String defaultOutputDirectory = new File(
+			System.getProperty("user.home") + "/Desktop/PDXSP Output/").toString();
 
 	public static void main(String[] args) {
 		String gameName;
@@ -95,13 +97,19 @@ public class EU4PositionModifier {
 		return result;
 	}
 
-	static float modifyValue(float value, float offset, Operation operation) {
+	static float modifyValue(float value, float offset, int upperBound, Operation operation) {
 		switch (operation) {
 		case SHIFT: {
-			return value + offset;
+			value += offset;
+			if (value >= upperBound && upperBound > 0)
+				value %= upperBound;
+			return value;
 		}
 		case SCALE: {
-			return value * offset;
+			value *= offset;
+			if (value >= upperBound && upperBound > 0)
+				value %= upperBound;
+			return value;
 		}
 		default:
 			return value;
@@ -153,7 +161,7 @@ public class EU4PositionModifier {
 						+ selectedOption.getValue());
 			}
 		});
-		
+
 		// Output Directory Section
 		JLabel selectOutputDirectoryLabel = new JLabel("Select Output Directory: ");
 		JTextField selectOutputDirectory = new JTextField(defaultOutputDirectory);
@@ -198,7 +206,6 @@ public class EU4PositionModifier {
 		if (new File(selectOutputDirectory.getText()).exists()) {
 			openOutputDirectory.setEnabled(true);
 		}
-		
 
 		JLabel saveMethodLabel = new JLabel("Save Method: ");
 		JComboBox<String> selectSaveMethod = new JComboBox<String>(
@@ -218,14 +225,13 @@ public class EU4PositionModifier {
 			}
 		});
 
-
 		JLabel filesToEditLabel = new JLabel("Files to edit: ");
 		JPanel filesToEditxArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox positionsCheckbox = new JCheckBox("Positions", true);
 		JCheckBox tradeNodesCheckbox = new JCheckBox("Trade Nodes", true);
 		JCheckBox ambientObjectsCheckbox = new JCheckBox("Ambient Objects", true);
-		JCheckBox adjacenciesCheckbox = new JCheckBox("Adjacencies", true);
-		JCheckBox lakesCheckbox = new JCheckBox("Lakes", true);
+		JCheckBox adjacenciesCheckbox = new JCheckBox("Adjacencies", false);
+		JCheckBox lakesCheckbox = new JCheckBox("Lakes", false);
 
 		JLabel offsetSettingsLabel = new JLabel("Adjust Positions By: ");
 		JPanel offsetSettingsArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -248,16 +254,23 @@ public class EU4PositionModifier {
 					offsetSettingsXSpinner.setValue(0);
 					offsetSettingsYSpinner.setValue(0);
 					offsetSettingsZSpinner.setValue(0);
+
+					wrapOutOfBounds.setEnabled(true);
+
 				} else {
 					offsetSettingsXSpinner.setValue(1);
 					offsetSettingsYSpinner.setValue(1);
 					offsetSettingsZSpinner.setValue(1);
+
+					wrapOutOfBounds.setSelected(false);
+					wrapOutOfBounds.setEnabled(false);
+
 				}
 			}
 		});
-		
-		JCheckBox wrapOutOfBounds = new JCheckBox("Wrap out-of-bounds points");
-		
+
+		wrapOutOfBounds = new JCheckBox("Wrap out-of-bounds points");
+
 		JLabel instructions = new JLabel(
 				"<html><b>Instructions</b><br/>The following is Paradox's doing, not mine.<ul><li>-X: Moves things left</li><li>+X: Moves things right</li><li>-Y: Moves things lower to the map's surface (only for ambient objects)</li><li>+Y: Moves things higher above the map's surface (only for ambient objects)</li><li>-Z: Moves things down</li><li>+Z: Moves things up</li></ul><html>");
 
@@ -287,6 +300,24 @@ public class EU4PositionModifier {
 				Float yOffset = Float.parseFloat(offsetSettingsYSpinner.getValue().toString());
 				Float zOffset = Float.parseFloat(offsetSettingsZSpinner.getValue().toString());
 
+				int maxMapX = 0;
+				int maxMapZ = 0;
+				// Process map dimensions
+				if (wrapOutOfBounds.isSelected()) {
+					if (!new File(modFolder, "map/default.map").exists()) {
+						updateStatus(
+								"default.map not found: File must be present to enable \"Wrap out-of-bounds points\"\nThis operation has been cancelled.");
+						return;
+					} else {
+						ParadoxScriptFile defaultMapFile = new ParadoxScriptFile(
+								new File(modFolder, "map/default.map"));
+						maxMapX = Integer
+								.parseInt(defaultMapFile.getRootNode().getChildByIdentifier("width").getValue());
+						maxMapZ = Integer
+								.parseInt(defaultMapFile.getRootNode().getChildByIdentifier("height").getValue());
+					}
+				}
+
 				// Process Positions
 				if (positionsCheckbox.isSelected()) {
 					if (new File(modFolder, "map/positions.txt").exists()) {
@@ -304,9 +335,9 @@ public class EU4PositionModifier {
 									ParadoxScriptNode valueNode = positions.getChildren().get(i);
 									float value = Float.parseFloat(valueNode.getIdentifier());
 									if (i % 2 == 0) {
-										value = modifyValue(value, xOffset, operation);
+										value = modifyValue(value, xOffset, maxMapX, operation);
 									} else {
-										value = modifyValue(value, zOffset, operation);
+										value = modifyValue(value, zOffset, maxMapZ, operation);
 									}
 									valueNode.setIdentifier(Float.toString(value));
 								}
@@ -404,7 +435,7 @@ public class EU4PositionModifier {
 		c.gridx = 1;
 		c.gridy = 0;
 		topbar.add(selectMod, c);
-		
+
 		// Save method
 		c.gridx = 0;
 		c.gridy = 1;
@@ -472,7 +503,7 @@ public class EU4PositionModifier {
 		c.gridy = 4;
 		c.weightx = 1;
 		topbar.add(offsetSettingsArea, c);
-		
+
 //		// Instructions
 //		c.gridx = 0;
 //		c.gridy = 7;
@@ -491,7 +522,7 @@ public class EU4PositionModifier {
 
 		// Status Bar
 		f.add(scrollPane, BorderLayout.CENTER);
-		
+
 		f.add(new JLabel("  A tool by theolaa"), BorderLayout.PAGE_END);
 
 		f.setPreferredSize(new Dimension(1150, 600));
