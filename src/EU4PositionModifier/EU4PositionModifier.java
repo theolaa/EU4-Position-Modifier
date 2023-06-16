@@ -153,7 +153,7 @@ public class EU4PositionModifier {
 						+ selectedOption.getValue());
 			}
 		});
-
+		
 		// Output Directory Section
 		JLabel selectOutputDirectoryLabel = new JLabel("Select Output Directory: ");
 		JTextField selectOutputDirectory = new JTextField(defaultOutputDirectory);
@@ -198,6 +198,26 @@ public class EU4PositionModifier {
 		if (new File(selectOutputDirectory.getText()).exists()) {
 			openOutputDirectory.setEnabled(true);
 		}
+		
+
+		JLabel saveMethodLabel = new JLabel("Save Method: ");
+		JComboBox<String> selectSaveMethod = new JComboBox<String>(
+				new String[] { "Overwrite", "Overwrite with backup", "Separate output folder" });
+		selectSaveMethod.setSelectedIndex(2);
+		selectSaveMethod.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// Save to output folder
+				if (selectSaveMethod.getSelectedIndex() == 2) {
+					selectOutputDirectory.setEnabled(true);
+					openSelectDirectoryDialgogue.setEnabled(true);
+				} else {
+					selectOutputDirectory.setEnabled(false);
+					openSelectDirectoryDialgogue.setEnabled(false);
+				}
+			}
+		});
+
 
 		JLabel filesToEditLabel = new JLabel("Files to edit: ");
 		JPanel filesToEditxArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -235,24 +255,6 @@ public class EU4PositionModifier {
 		});
 		
 		JCheckBox wrapOutOfBounds = new JCheckBox("Wrap out-of-bounds points");
-
-		JLabel saveMethodLabel = new JLabel("Save Method: ");
-		JComboBox<String> selectSaveMethod = new JComboBox<String>(
-				new String[] { "Overwrite", "Overwrite with backup", "Separate output folder" });
-		selectSaveMethod.setSelectedIndex(2);
-		selectSaveMethod.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// Save to output folder
-				if (selectSaveMethod.getSelectedIndex() == 2) {
-					selectOutputDirectory.setEnabled(true);
-					openSelectDirectoryDialgogue.setEnabled(true);
-				} else {
-					selectOutputDirectory.setEnabled(false);
-					openSelectDirectoryDialgogue.setEnabled(false);
-				}
-			}
-		});
 		
 		JLabel instructions = new JLabel(
 				"<html><b>Instructions</b><br/>The following is Paradox's doing, not mine.<ul><li>-X: Moves things left</li><li>+X: Moves things right</li><li>-Y: Moves things lower to the map's surface (only for ambient objects)</li><li>+Y: Moves things higher above the map's surface (only for ambient objects)</li><li>-Z: Moves things down</li><li>+Z: Moves things up</li></ul><html>");
@@ -370,21 +372,30 @@ public class EU4PositionModifier {
 		c.gridx = 1;
 		c.gridy = 0;
 		topbar.add(selectMod, c);
+		
+		// Save method
+		c.gridx = 0;
+		c.gridy = 1;
+		c.weightx = 0;
+		topbar.add(saveMethodLabel, c);
+		c.gridx = 1;
+		c.gridwidth = 1;
+		topbar.add(selectSaveMethod, c);
 
 		// Add Select Output Directory Section
 		c.weightx = 0;
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		topbar.add(selectOutputDirectoryLabel, c);
 
 		c.weightx = 1;
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = 2;
 		topbar.add(selectOutputDirectory, c);
 
 		c.weightx = 1;
 		c.gridx = 2;
-		c.gridy = 1;
+		c.gridy = 2;
 		topbar.add(openSelectDirectoryDialgogue, c);
 
 		// Files to Edit
@@ -427,15 +438,6 @@ public class EU4PositionModifier {
 		c.gridy = 4;
 		c.weightx = 1;
 		topbar.add(offsetSettingsArea, c);
-
-		// Save method
-		c.gridx = 0;
-		c.gridy = 5;
-		c.weightx = 0;
-		topbar.add(saveMethodLabel, c);
-		c.gridx = 1;
-		c.gridwidth = 1;
-		topbar.add(selectSaveMethod, c);
 		
 //		// Instructions
 //		c.gridx = 0;
@@ -445,7 +447,7 @@ public class EU4PositionModifier {
 
 		// Add Start Button
 		c.gridx = 0;
-		c.gridy = 7;
+		c.gridy = 5;
 		c.weightx = 1;
 		c.gridwidth = 3;
 		topbar.add(startButton, c);
