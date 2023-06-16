@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -271,9 +272,6 @@ public class EU4PositionModifier {
 
 		wrapOutOfBounds = new JCheckBox("Wrap out-of-bounds points");
 
-		JLabel instructions = new JLabel(
-				"<html><b>Instructions</b><br/>The following is Paradox's doing, not mine.<ul><li>-X: Moves things left</li><li>+X: Moves things right</li><li>-Y: Moves things lower to the map's surface (only for ambient objects)</li><li>+Y: Moves things higher above the map's surface (only for ambient objects)</li><li>-Z: Moves things down</li><li>+Z: Moves things up</li></ul><html>");
-
 		startButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -432,6 +430,20 @@ public class EU4PositionModifier {
 
 		JScrollPane scrollPane = new JScrollPane(status);
 
+		JPanel infoArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel infoLabel = new JLabel("A tool by theolaa");
+		JButton infoButton = new JButton("View Instructions");
+		infoButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					Desktop.getDesktop().browse(new URL("https://github.com/theolaa/EU4-Position-Modifier/blob/master/README.md").toURI());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
 		c.insets = new Insets(5, 15, 5, 15);
 		c.weighty = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -535,7 +547,9 @@ public class EU4PositionModifier {
 		// Status Bar
 		f.add(scrollPane, BorderLayout.CENTER);
 
-		f.add(new JLabel("  A tool by theolaa"), BorderLayout.PAGE_END);
+		infoArea.add(infoLabel);
+		infoArea.add(infoButton);
+		f.add(infoArea, BorderLayout.PAGE_END);
 
 		f.setPreferredSize(new Dimension(1150, 600));
 		f.setMinimumSize(new Dimension(1150, 450));
