@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -36,9 +37,9 @@ import com.formdev.flatlaf.FlatLightLaf;
 public class EU4PositionModifier {
 
 	private static enum Operation {
-		ABSOLUTE, RELATIVE
+		SHIFT, SCALE
 	}
-
+	
 	private static JFrame f = new JFrame();
 	private static GridBagConstraints c = new GridBagConstraints();
 	private static JTextArea status = new JTextArea();
@@ -96,10 +97,10 @@ public class EU4PositionModifier {
 
 	static float modifyValue(float value, float offset, Operation operation) {
 		switch (operation) {
-		case ABSOLUTE: {
+		case SHIFT: {
 			return value + offset;
 		}
-		case RELATIVE: {
+		case SCALE: {
 			return value * offset;
 		}
 		default:
@@ -156,6 +157,7 @@ public class EU4PositionModifier {
 		// Output Directory Section
 		JLabel selectOutputDirectoryLabel = new JLabel("Select Output Directory: ");
 		JTextField selectOutputDirectory = new JTextField(defaultOutputDirectory);
+		selectOutputDirectory.setEditable(false);
 		JFileChooser selectOutputDirectoryNew = new JFileChooser(defaultOutputDirectory);
 		selectOutputDirectoryNew.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		selectOutputDirectoryNew.setAcceptAllFileFilterUsed(false);
@@ -215,11 +217,12 @@ public class EU4PositionModifier {
 		JLabel offsetSettingsZLabel = new JLabel("Z: ");
 		JSpinner offsetSettingsZSpinner = new JSpinner(offsetSettingsZSpinnerModel);
 
-		JComboBox<String> selectOperation = new JComboBox<String>(new String[] { "Absolute", "Relative" });
+		JLabel selectOperationLabel = new JLabel("Method: ");
+		JComboBox<String> selectOperation = new JComboBox<String>(new String[] { "Shift", "Scale" });
 		selectOperation.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if ("Absolute".equals(selectOperation.getSelectedItem().toString())) {
+				if ("Shift".equals(selectOperation.getSelectedItem().toString())) {
 					offsetSettingsXSpinner.setValue(0);
 					offsetSettingsYSpinner.setValue(0);
 					offsetSettingsZSpinner.setValue(0);
@@ -233,7 +236,7 @@ public class EU4PositionModifier {
 		
 		JCheckBox wrapOutOfBounds = new JCheckBox("Wrap out-of-bounds points");
 
-		JLabel saveMethodLabel = new JLabel("Save Method");
+		JLabel saveMethodLabel = new JLabel("Save Method: ");
 		JComboBox<String> selectSaveMethod = new JComboBox<String>(
 				new String[] { "Overwrite", "Overwrite with backup", "Separate output folder" });
 		selectSaveMethod.setSelectedIndex(2);
@@ -270,10 +273,10 @@ public class EU4PositionModifier {
 				}
 
 				Operation operation;
-				if ("Absolute".equals(selectOperation.getSelectedItem().toString())) {
-					operation = Operation.ABSOLUTE;
+				if ("Shift".equals(selectOperation.getSelectedItem().toString())) {
+					operation = Operation.SHIFT;
 				} else {
-					operation = Operation.RELATIVE;
+					operation = Operation.SCALE;
 				}
 
 				Float xOffset = Float.parseFloat(offsetSettingsXSpinner.getValue().toString());
@@ -417,6 +420,7 @@ public class EU4PositionModifier {
 		offsetSettingsArea.add(offsetSettingsYSpinner);
 		offsetSettingsArea.add(offsetSettingsZLabel);
 		offsetSettingsArea.add(offsetSettingsZSpinner);
+		offsetSettingsArea.add(selectOperationLabel);
 		offsetSettingsArea.add(selectOperation);
 		offsetSettingsArea.add(wrapOutOfBounds);
 		c.gridx = 1;
@@ -430,7 +434,7 @@ public class EU4PositionModifier {
 		c.weightx = 0;
 		topbar.add(saveMethodLabel, c);
 		c.gridx = 1;
-		c.weightx = 1;
+		c.gridwidth = 1;
 		topbar.add(selectSaveMethod, c);
 		
 //		// Instructions
@@ -451,11 +455,14 @@ public class EU4PositionModifier {
 
 		// Status Bar
 		f.add(scrollPane, BorderLayout.CENTER);
+		
+		f.add(new JLabel("  A tool by theolaa"), BorderLayout.PAGE_END);
 
-		f.setPreferredSize(new Dimension(1100, 600));
-		f.setMinimumSize(new Dimension(1100, 450));
+		f.setPreferredSize(new Dimension(1150, 600));
+		f.setMinimumSize(new Dimension(1150, 450));
 		f.pack();
 		f.setLocationRelativeTo(null);
+		f.setIconImage(new ImageIcon(EU4PositionModifier.class.getClassLoader().getResource("icon.png")).getImage());
 		f.setVisible(true);
 	}
 
