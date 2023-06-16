@@ -54,7 +54,7 @@ public class EU4PositionModifier {
 
 	public static void main(String[] args) {
 		String gameName;
-		if (args.length > 0 && "egs".equals(args[0])) {
+		if (args.length > 0 && "-egs".equals(args[0].toLowerCase())) {
 			gameName = "Europa Universalis IV EGS";
 		} else {
 			gameName = "Europa Universalis IV";
