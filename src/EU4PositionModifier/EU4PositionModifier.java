@@ -358,7 +358,19 @@ public class EU4PositionModifier {
 						for (File f : new File(modFolder, "common/tradenodes").listFiles()) {
 							ParadoxScriptFile tradeNodesFile = new ParadoxScriptFile(f);
 							for (ParadoxScriptNode node : tradeNodesFile.getRootNode().getChildren()) {
-
+								for (ParadoxScriptNode outgoing : node.getChildrenByIdentifier("outgoing")) {
+									ParadoxScriptNode control = outgoing.getChildByIdentifier("control");
+									for (int i = 0; i < control.getChildren().size(); i++) {
+										ParadoxScriptNode valueNode = control.getChildren().get(i);
+										float value = Float.parseFloat(valueNode.getIdentifier());
+										if (i % 2 == 0) {
+											value = modifyValue(value, xOffset, maxMapX, operation);
+										} else {
+											value = modifyValue(value, zOffset, maxMapZ, operation);
+										}
+										valueNode.setIdentifier(Float.toString(value));
+									}
+								}
 							}
 							saveFile(tradeNodesFile, saveMethod, new File(outputFolder, "common/tradenodes"));
 						}
