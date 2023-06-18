@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -98,7 +98,8 @@ public class EU4PositionModifier {
 		return result;
 	}
 
-	static void processXZPositions(ParadoxScriptNode positionBlock, float xOffset, int maxMapX, float zOffset, int maxMapZ, Operation operation) {
+	static void processXZPositions(ParadoxScriptNode positionBlock, float xOffset, int maxMapX, float zOffset,
+			int maxMapZ, Operation operation) {
 		for (int i = 0; i < positionBlock.getChildren().size(); i++) {
 			ParadoxScriptNode valueNode = positionBlock.getChildren().get(i);
 			float value = Float.parseFloat(valueNode.getIdentifier());
@@ -110,7 +111,7 @@ public class EU4PositionModifier {
 			valueNode.setIdentifier(Float.toString(value));
 		}
 	}
-	
+
 	static float modifyValue(float value, float offset, int upperBound, Operation operation) {
 		switch (operation) {
 		case SHIFT: {
@@ -382,18 +383,20 @@ public class EU4PositionModifier {
 								new File(modFolder, "map/ambient_object.txt"));
 						for (ParadoxScriptNode node : ambientObjectsFile.getRootNode().getChildren()) {
 							for (ParadoxScriptNode object : node.getChildrenByIdentifier("object")) {
-								
+
 								// Extract all the current position values
-								ArrayList<ParadoxScriptNode> positions = object.getChildByIdentifier("position").getChildrenObject();
+								ArrayList<ParadoxScriptNode> positions = object.getChildByIdentifier("position")
+										.getChildrenObject();
 								float xVal = Float.parseFloat(positions.get(0).getIdentifier());
 								float yVal = Float.parseFloat(positions.get(1).getIdentifier());
 								float zVal = Float.parseFloat(positions.get(2).getIdentifier());
-								
+
 								// Modify them according to the configured options
-								xVal = modifyValue(xVal,xOffset, maxMapX, operation);
-								zVal = modifyValue(zVal,zOffset, maxMapZ, operation);
-								
-								// Y has special considerations since it should never be less than zero, and wrapping doesn't make any sense for Y
+								xVal = modifyValue(xVal, xOffset, maxMapX, operation);
+								zVal = modifyValue(zVal, zOffset, maxMapZ, operation);
+
+								// Y has special considerations since it should never be less than zero, and
+								// wrapping doesn't make any sense for Y
 								switch (operation) {
 								case SHIFT:
 									yVal += yOffset;
@@ -404,10 +407,10 @@ public class EU4PositionModifier {
 								default:
 									break;
 								}
-								if (yVal < 0 ) {
+								if (yVal < 0) {
 									yVal = 0;
 								}
-								
+
 								// Apply the updated values
 								positions.get(0).setIdentifier(Float.toString(xVal));
 								positions.get(1).setIdentifier(Float.toString(yVal));
@@ -464,7 +467,7 @@ public class EU4PositionModifier {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					Desktop.getDesktop().browse(
-							new URL("https://github.com/theolaa/EU4-Position-Modifier/blob/master/README.md").toURI());
+							new URI("https://github.com/theolaa/EU4-Position-Modifier/blob/master/README.md"));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
