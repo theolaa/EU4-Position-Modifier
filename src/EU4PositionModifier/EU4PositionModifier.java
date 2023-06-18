@@ -98,6 +98,19 @@ public class EU4PositionModifier {
 		return result;
 	}
 
+	static void processXZPositions(ParadoxScriptNode positionBlock, float xOffset, int maxMapX, float zOffset, int maxMapZ, Operation operation) {
+		for (int i = 0; i < positionBlock.getChildren().size(); i++) {
+			ParadoxScriptNode valueNode = positionBlock.getChildren().get(i);
+			float value = Float.parseFloat(valueNode.getIdentifier());
+			if (i % 2 == 0) {
+				value = modifyValue(value, xOffset, maxMapX, operation);
+			} else {
+				value = modifyValue(value, zOffset, maxMapZ, operation);
+			}
+			valueNode.setIdentifier(Float.toString(value));
+		}
+	}
+	
 	static float modifyValue(float value, float offset, int upperBound, Operation operation) {
 		switch (operation) {
 		case SHIFT: {
@@ -329,16 +342,7 @@ public class EU4PositionModifier {
 							if (positions.getChildren().size() != 14) {
 								updateStatus("ERROR: Malformed positions entry for " + province.getIdentifier());
 							} else {
-								for (int i = 0; i < positions.getChildren().size(); i++) {
-									ParadoxScriptNode valueNode = positions.getChildren().get(i);
-									float value = Float.parseFloat(valueNode.getIdentifier());
-									if (i % 2 == 0) {
-										value = modifyValue(value, xOffset, maxMapX, operation);
-									} else {
-										value = modifyValue(value, zOffset, maxMapZ, operation);
-									}
-									valueNode.setIdentifier(Float.toString(value));
-								}
+								processXZPositions(positions, xOffset, maxMapX, zOffset, maxMapZ, operation);
 							}
 						}
 						saveFile(positionsFile, saveMethod, new File(outputFolder, "map"));
@@ -358,16 +362,7 @@ public class EU4PositionModifier {
 							for (ParadoxScriptNode node : tradeNodesFile.getRootNode().getChildren()) {
 								for (ParadoxScriptNode outgoing : node.getChildrenByIdentifier("outgoing")) {
 									ParadoxScriptNode control = outgoing.getChildByIdentifier("control");
-									for (int i = 0; i < control.getChildren().size(); i++) {
-										ParadoxScriptNode valueNode = control.getChildren().get(i);
-										float value = Float.parseFloat(valueNode.getIdentifier());
-										if (i % 2 == 0) {
-											value = modifyValue(value, xOffset, maxMapX, operation);
-										} else {
-											value = modifyValue(value, zOffset, maxMapZ, operation);
-										}
-										valueNode.setIdentifier(Float.toString(value));
-									}
+									processXZPositions(control, xOffset, maxMapX, zOffset, maxMapZ, operation);
 								}
 							}
 							saveFile(tradeNodesFile, saveMethod, new File(outputFolder, "common/tradenodes"));
