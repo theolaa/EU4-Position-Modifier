@@ -386,7 +386,38 @@ public class EU4PositionModifier {
 						ParadoxScriptFile ambientObjectsFile = new ParadoxScriptFile(
 								new File(modFolder, "map/ambient_object.txt"));
 						for (ParadoxScriptNode node : ambientObjectsFile.getRootNode().getChildren()) {
-
+							for (ParadoxScriptNode object : node.getChildrenByIdentifier("object")) {
+								
+								// Extract all the current position values
+								ArrayList<ParadoxScriptNode> positions = object.getChildByIdentifier("position").getChildrenObject();
+								float xVal = Float.parseFloat(positions.get(0).getIdentifier());
+								float yVal = Float.parseFloat(positions.get(1).getIdentifier());
+								float zVal = Float.parseFloat(positions.get(2).getIdentifier());
+								
+								// Modify them according to the configured options
+								xVal = modifyValue(xVal,xOffset, maxMapX, operation);
+								zVal = modifyValue(zVal,zOffset, maxMapZ, operation);
+								
+								// Y has special considerations since it should never be less than zero, and wrapping doesn't make any sense for Y
+								switch (operation) {
+								case SHIFT:
+									yVal += yOffset;
+									break;
+								case SCALE:
+									yVal *= yOffset;
+									break;
+								default:
+									break;
+								}
+								if (yVal < 0 ) {
+									yVal = 0;
+								}
+								
+								// Apply the updated values
+								positions.get(0).setIdentifier(Float.toString(xVal));
+								positions.get(1).setIdentifier(Float.toString(yVal));
+								positions.get(2).setIdentifier(Float.toString(zVal));
+							}
 						}
 						saveFile(ambientObjectsFile, saveMethod, new File(outputFolder, "map"));
 					} else {
