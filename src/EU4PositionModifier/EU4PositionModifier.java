@@ -246,7 +246,7 @@ public class EU4PositionModifier {
 		JCheckBox tradeNodesCheckbox = new JCheckBox("Trade Nodes", true);
 		JCheckBox ambientObjectsCheckbox = new JCheckBox("Ambient Objects", true);
 		JCheckBox adjacenciesCheckbox = new JCheckBox("Adjacencies", false);
-		JCheckBox lakesCheckbox = new JCheckBox("Lakes", false);
+		JCheckBox lakesCheckbox = new JCheckBox("Lakes", true);
 
 		JLabel offsetSettingsLabel = new JLabel("Adjust Positions By: ");
 		JPanel offsetSettingsArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -443,8 +443,9 @@ public class EU4PositionModifier {
 						}
 						for (File f : new File(modFolder, "map/lakes").listFiles()) {
 							ParadoxScriptFile lakesFile = new ParadoxScriptFile(f);
-							for (ParadoxScriptNode node : lakesFile.getRootNode().getChildren()) {
-
+							for (ParadoxScriptNode lake : lakesFile.getRootNode().getChildrenByIdentifier("lake")) {
+								ParadoxScriptNode triangle_strip = lake.getChildByIdentifier("triangle_strip");
+								processXZPositions(triangle_strip, xOffset, maxMapX, zOffset, maxMapZ, operation);
 							}
 							saveFile(lakesFile, saveMethod, new File(outputFolder, "map/lakes"));
 						}
@@ -526,7 +527,7 @@ public class EU4PositionModifier {
 		filesToEditxArea.add(tradeNodesCheckbox);
 		filesToEditxArea.add(ambientObjectsCheckbox);
 //		filesToEditxArea.add(adjacenciesCheckbox);
-//		filesToEditxArea.add(lakesCheckbox);
+		filesToEditxArea.add(lakesCheckbox);
 		c.gridx = 1;
 		c.gridy = 3;
 		c.weightx = 1;
