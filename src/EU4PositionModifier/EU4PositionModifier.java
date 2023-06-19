@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -185,8 +186,8 @@ public class EU4PositionModifier {
 		selectOutputDirectoryNew.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		selectOutputDirectoryNew.setAcceptAllFileFilterUsed(false);
 
+		JPanel outputButtonArea = new JPanel();
 		JButton openOutputDirectory = new JButton("Open Output Directory");
-
 		JButton openSelectDirectoryDialgogue = new JButton("Set Folder");
 		openSelectDirectoryDialgogue.addActionListener(new ActionListener() {
 
@@ -446,6 +447,7 @@ public class EU4PositionModifier {
 							for (ParadoxScriptNode lake : lakesFile.getRootNode().getChildrenByIdentifier("lake")) {
 								ParadoxScriptNode triangle_strip = lake.getChildByIdentifier("triangle_strip");
 								processXYPositions(triangle_strip, xOffset, maxMapX, yOffset, maxMapY, operation);
+								float height = Float.parseFloat(lake.getChildByIdentifier("height").getValue());
 							}
 							saveFile(lakesFile, saveMethod, new File(outputFolder, "map/lakes"));
 						}
@@ -511,15 +513,18 @@ public class EU4PositionModifier {
 		c.gridy = 2;
 		topbar.add(selectOutputDirectory, c);
 
+		outputButtonArea.setLayout(new GridLayout(0,2,10,0));
+		outputButtonArea.add(openSelectDirectoryDialgogue);
+		outputButtonArea.add(openOutputDirectory);
 		c.weightx = 1;
-		c.gridx = 2;
-		c.gridy = 2;
-		topbar.add(openSelectDirectoryDialgogue, c);
+		c.gridx = 1;
+		c.gridy = 3;
+		topbar.add(outputButtonArea, c);
 
 		// Files to Edit
 		c.weightx = 0;
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = 4;
 		topbar.add(filesToEditLabel, c);
 
 		// Add Checkboxes
@@ -529,19 +534,14 @@ public class EU4PositionModifier {
 //		filesToEditxArea.add(adjacenciesCheckbox);
 		filesToEditxArea.add(lakesCheckbox);
 		c.gridx = 1;
-		c.gridy = 3;
+		c.gridy = 4;
 		c.weightx = 1;
 		topbar.add(filesToEditxArea, c);
-
-		c.weightx = 0;
-		c.gridx = 2;
-		c.gridy = 3;
-		topbar.add(openOutputDirectory, c);
 
 		// Offset Settings
 		c.weightx = 0;
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 5;
 		topbar.add(offsetSettingsLabel, c);
 
 		// Labels and Spinners
@@ -555,13 +555,13 @@ public class EU4PositionModifier {
 		offsetSettingsArea.add(selectOperation);
 		offsetSettingsArea.add(wrapOutOfBounds);
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = 5;
 		c.weightx = 1;
 		topbar.add(offsetSettingsArea, c);
 
 		// Add Start Button
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = 6;
 		c.weightx = 1;
 		c.gridwidth = 3;
 		topbar.add(startButton, c);
@@ -576,8 +576,8 @@ public class EU4PositionModifier {
 		infoArea.add(infoButton);
 		f.add(infoArea, BorderLayout.PAGE_END);
 
-		f.setPreferredSize(new Dimension(1200, 600));
-		f.setMinimumSize(new Dimension(1200, 450));
+		f.setPreferredSize(new Dimension(975, 450));
+		f.setMinimumSize(new Dimension(975, 450));
 		f.pack();
 		f.setLocationRelativeTo(null);
 		f.setIconImage(new ImageIcon(EU4PositionModifier.class.getClassLoader().getResource("icon.png")).getImage());
