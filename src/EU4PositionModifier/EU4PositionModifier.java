@@ -98,15 +98,15 @@ public class EU4PositionModifier {
 		return result;
 	}
 
-	static void processXZPositions(ParadoxScriptNode positionBlock, float xOffset, int maxMapX, float zOffset,
-			int maxMapZ, Operation operation) {
+	static void processXYPositions(ParadoxScriptNode positionBlock, float xOffset, int maxMapX, float yOffset,
+			int maxMapY, Operation operation) {
 		for (int i = 0; i < positionBlock.getChildren().size(); i++) {
 			ParadoxScriptNode valueNode = positionBlock.getChildren().get(i);
 			float value = Float.parseFloat(valueNode.getIdentifier());
 			if (i % 2 == 0) {
 				value = modifyValue(value, xOffset, maxMapX, operation);
 			} else {
-				value = modifyValue(value, zOffset, maxMapZ, operation);
+				value = modifyValue(value, yOffset, maxMapY, operation);
 			}
 			valueNode.setIdentifier(Float.toString(value));
 		}
@@ -252,13 +252,13 @@ public class EU4PositionModifier {
 		JPanel offsetSettingsArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		SpinnerModel offsetSettingsXSpinnerModel = new SpinnerNumberModel(0, -100000, 100000, 0.01);
 		SpinnerModel offsetSettingsYSpinnerModel = new SpinnerNumberModel(0, -100000, 100000, 0.01);
-		SpinnerModel offsetSettingsZSpinnerModel = new SpinnerNumberModel(0, -100000, 100000, 0.01);
+		SpinnerModel offsetSettingsHeightSpinnerModel = new SpinnerNumberModel(0, -100000, 100000, 0.01);
 		JLabel offsetSettingsXLabel = new JLabel("X: ");
 		JSpinner offsetSettingsXSpinner = new JSpinner(offsetSettingsXSpinnerModel);
 		JLabel offsetSettingsYLabel = new JLabel("Y: ");
 		JSpinner offsetSettingsYSpinner = new JSpinner(offsetSettingsYSpinnerModel);
-		JLabel offsetSettingsZLabel = new JLabel("Z: ");
-		JSpinner offsetSettingsZSpinner = new JSpinner(offsetSettingsZSpinnerModel);
+		JLabel offsetSettingsHeightLabel = new JLabel("Height: ");
+		JSpinner offsetSettingsHeightSpinner = new JSpinner(offsetSettingsHeightSpinnerModel);
 
 		JLabel selectOperationLabel = new JLabel("Method: ");
 		JComboBox<String> selectOperation = new JComboBox<String>(new String[] { "Shift", "Scale" });
@@ -267,15 +267,15 @@ public class EU4PositionModifier {
 			public void actionPerformed(ActionEvent arg0) {
 				if ("Shift".equals(selectOperation.getSelectedItem().toString())) {
 					offsetSettingsXSpinner.setValue(0);
+					offsetSettingsHeightSpinner.setValue(0);
 					offsetSettingsYSpinner.setValue(0);
-					offsetSettingsZSpinner.setValue(0);
 
 					wrapOutOfBounds.setEnabled(true);
 
 				} else {
 					offsetSettingsXSpinner.setValue(1);
+					offsetSettingsHeightSpinner.setValue(1);
 					offsetSettingsYSpinner.setValue(1);
-					offsetSettingsZSpinner.setValue(1);
 
 					wrapOutOfBounds.setSelected(false);
 					wrapOutOfBounds.setEnabled(false);
@@ -309,11 +309,11 @@ public class EU4PositionModifier {
 				}
 
 				Float xOffset = Float.parseFloat(offsetSettingsXSpinner.getValue().toString());
+				Float heightOffset = Float.parseFloat(offsetSettingsHeightSpinner.getValue().toString());
 				Float yOffset = Float.parseFloat(offsetSettingsYSpinner.getValue().toString());
-				Float zOffset = Float.parseFloat(offsetSettingsZSpinner.getValue().toString());
 
 				int maxMapX = 0;
-				int maxMapZ = 0;
+				int maxMapY = 0;
 				// Process map dimensions
 				if (wrapOutOfBounds.isSelected()) {
 					if (!new File(modFolder, "map/default.map").exists()) {
@@ -325,7 +325,7 @@ public class EU4PositionModifier {
 								new File(modFolder, "map/default.map"));
 						maxMapX = Integer
 								.parseInt(defaultMapFile.getRootNode().getChildByIdentifier("width").getValue());
-						maxMapZ = Integer
+						maxMapY = Integer
 								.parseInt(defaultMapFile.getRootNode().getChildByIdentifier("height").getValue());
 					}
 				}
@@ -343,7 +343,7 @@ public class EU4PositionModifier {
 							if (positions.getChildren().size() != 14) {
 								updateStatus("ERROR: Malformed positions entry for " + province.getIdentifier());
 							} else {
-								processXZPositions(positions, xOffset, maxMapX, zOffset, maxMapZ, operation);
+								processXYPositions(positions, xOffset, maxMapX, yOffset, maxMapY, operation);
 							}
 						}
 						saveFile(positionsFile, saveMethod, new File(outputFolder, "map"));
@@ -363,7 +363,7 @@ public class EU4PositionModifier {
 							for (ParadoxScriptNode node : tradeNodesFile.getRootNode().getChildren()) {
 								for (ParadoxScriptNode outgoing : node.getChildrenByIdentifier("outgoing")) {
 									ParadoxScriptNode control = outgoing.getChildByIdentifier("control");
-									processXZPositions(control, xOffset, maxMapX, zOffset, maxMapZ, operation);
+									processXYPositions(control, xOffset, maxMapX, yOffset, maxMapY, operation);
 								}
 							}
 							saveFile(tradeNodesFile, saveMethod, new File(outputFolder, "common/tradenodes"));
@@ -388,33 +388,33 @@ public class EU4PositionModifier {
 								ArrayList<ParadoxScriptNode> positions = object.getChildByIdentifier("position")
 										.getChildrenObject();
 								float xVal = Float.parseFloat(positions.get(0).getIdentifier());
-								float yVal = Float.parseFloat(positions.get(1).getIdentifier());
-								float zVal = Float.parseFloat(positions.get(2).getIdentifier());
+								float heightVal = Float.parseFloat(positions.get(1).getIdentifier());
+								float yVal = Float.parseFloat(positions.get(2).getIdentifier());
 
 								// Modify them according to the configured options
 								xVal = modifyValue(xVal, xOffset, maxMapX, operation);
-								zVal = modifyValue(zVal, zOffset, maxMapZ, operation);
+								yVal = modifyValue(yVal, yOffset, maxMapY, operation);
 
 								// Y has special considerations since it should never be less than zero, and
 								// wrapping doesn't make any sense for Y
 								switch (operation) {
 								case SHIFT:
-									yVal += yOffset;
+									heightVal += heightOffset;
 									break;
 								case SCALE:
-									yVal *= yOffset;
+									heightVal *= heightOffset;
 									break;
 								default:
 									break;
 								}
-								if (yVal < 0) {
-									yVal = 0;
+								if (heightVal < 0) {
+									heightVal = 0;
 								}
 
 								// Apply the updated values
 								positions.get(0).setIdentifier(Float.toString(xVal));
-								positions.get(1).setIdentifier(Float.toString(yVal));
-								positions.get(2).setIdentifier(Float.toString(zVal));
+								positions.get(1).setIdentifier(Float.toString(heightVal));
+								positions.get(2).setIdentifier(Float.toString(yVal));
 							}
 						}
 						saveFile(ambientObjectsFile, saveMethod, new File(outputFolder, "map"));
@@ -445,7 +445,7 @@ public class EU4PositionModifier {
 							ParadoxScriptFile lakesFile = new ParadoxScriptFile(f);
 							for (ParadoxScriptNode lake : lakesFile.getRootNode().getChildrenByIdentifier("lake")) {
 								ParadoxScriptNode triangle_strip = lake.getChildByIdentifier("triangle_strip");
-								processXZPositions(triangle_strip, xOffset, maxMapX, zOffset, maxMapZ, operation);
+								processXYPositions(triangle_strip, xOffset, maxMapX, yOffset, maxMapY, operation);
 							}
 							saveFile(lakesFile, saveMethod, new File(outputFolder, "map/lakes"));
 						}
@@ -549,8 +549,8 @@ public class EU4PositionModifier {
 		offsetSettingsArea.add(offsetSettingsXSpinner);
 		offsetSettingsArea.add(offsetSettingsYLabel);
 		offsetSettingsArea.add(offsetSettingsYSpinner);
-		offsetSettingsArea.add(offsetSettingsZLabel);
-		offsetSettingsArea.add(offsetSettingsZSpinner);
+		offsetSettingsArea.add(offsetSettingsHeightLabel);
+		offsetSettingsArea.add(offsetSettingsHeightSpinner);
 		offsetSettingsArea.add(selectOperationLabel);
 		offsetSettingsArea.add(selectOperation);
 		offsetSettingsArea.add(wrapOutOfBounds);
