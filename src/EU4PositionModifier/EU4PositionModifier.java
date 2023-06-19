@@ -108,7 +108,7 @@ public class EU4PositionModifier {
 			} else {
 				value = modifyValue(value, yOffset, maxMapY, operation);
 			}
-			valueNode.setIdentifier(Float.toString(value));
+			valueNode.setIdentifier(String.format("%.3f", value));
 		}
 	}
 
@@ -576,8 +576,8 @@ public class EU4PositionModifier {
 		infoArea.add(infoButton);
 		f.add(infoArea, BorderLayout.PAGE_END);
 
-		f.setPreferredSize(new Dimension(1150, 600));
-		f.setMinimumSize(new Dimension(1150, 450));
+		f.setPreferredSize(new Dimension(1200, 600));
+		f.setMinimumSize(new Dimension(1200, 450));
 		f.pack();
 		f.setLocationRelativeTo(null);
 		f.setIconImage(new ImageIcon(EU4PositionModifier.class.getClassLoader().getResource("icon.png")).getImage());
