@@ -434,20 +434,21 @@ public class EU4PositionModifier {
 							for (ParadoxScriptNode lake : lakesFile.getRootNode().getChildrenByIdentifier("lake")) {
 								ParadoxScriptNode triangle_strip = lake.getChildByIdentifier("triangle_strip");
 								processXYPositions(triangle_strip, xOffset, maxMapX, yOffset, maxMapY, operation);
-								float height = Float.parseFloat(lake.getChildByIdentifier("height").getValue());
-								switch (operation) {
-								case SHIFT:
-									height += heightOffset;
-									break;
-								case SCALE:
-									height *= heightOffset;
-									break;
-								default:
-									break;
-								}
-								if (height < 0) {
-									height = 0;
-								}
+//								float height = Float.parseFloat(lake.getChildByIdentifier("height").getValue());
+//								switch (operation) {
+//								case SHIFT:
+//									height += heightOffset;
+//									break;
+//								case SCALE:
+//									height *= heightOffset;
+//									break;
+//								default:
+//									break;
+//								}
+//								if (height < 0) {
+//									height = 0;
+//								}
+//								lake.getChildByIdentifier("height").setValue(Float.toString(height));
 							}
 							saveFile(lakesFile, saveMethod, new File(outputFolder, "map/lakes"));
 						}
