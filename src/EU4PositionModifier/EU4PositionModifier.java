@@ -246,7 +246,6 @@ public class EU4PositionModifier {
 		JCheckBox positionsCheckbox = new JCheckBox("Positions", true);
 		JCheckBox tradeNodesCheckbox = new JCheckBox("Trade Nodes", true);
 		JCheckBox ambientObjectsCheckbox = new JCheckBox("Ambient Objects", true);
-		JCheckBox adjacenciesCheckbox = new JCheckBox("Adjacencies", false);
 		JCheckBox lakesCheckbox = new JCheckBox("Lakes", true);
 
 		JLabel offsetSettingsLabel = new JLabel("Adjust Positions By: ");
@@ -424,18 +423,6 @@ public class EU4PositionModifier {
 					}
 				}
 
-				// Process Adjacencies
-				if (adjacenciesCheckbox.isSelected()) {
-					if (new File(modFolder, "map/adjacencies.csv").exists()) {
-						if (saveMethod == 2) {
-							new File(outputFolder, "map").mkdir();
-						}
-						// TODO
-					} else {
-						updateStatus("No file found at map/adjacencies.csv");
-					}
-				}
-
 				// Process Lakes
 				if (lakesCheckbox.isSelected()) {
 					if (new File(modFolder, "map/lakes").exists()) {
@@ -531,7 +518,6 @@ public class EU4PositionModifier {
 		filesToEditxArea.add(positionsCheckbox);
 		filesToEditxArea.add(tradeNodesCheckbox);
 		filesToEditxArea.add(ambientObjectsCheckbox);
-//		filesToEditxArea.add(adjacenciesCheckbox);
 		filesToEditxArea.add(lakesCheckbox);
 		c.gridx = 1;
 		c.gridy = 4;
