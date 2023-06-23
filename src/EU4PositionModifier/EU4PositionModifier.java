@@ -31,8 +31,8 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
-import pdx_script_parser.ParadoxScriptFile;
 import pdx_script_parser.ParadoxScriptNode;
+import pdx_script_parser.file_types.ParadoxScriptFile;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -81,7 +81,7 @@ public class EU4PositionModifier {
 				ParadoxScriptFile descriptor = new ParadoxScriptFile(new File(f, "/descriptor.mod"));
 				String name;
 				if (descriptor.ready()) {
-					name = descriptor.getRootNode().getChildByIdentifier("name").getValue().replaceAll("\"", "");
+					name = descriptor.getChildByIdentifier("name").getValue().replaceAll("\"", "");
 				} else {
 					name = folder;
 				}
@@ -324,9 +324,9 @@ public class EU4PositionModifier {
 						ParadoxScriptFile defaultMapFile = new ParadoxScriptFile(
 								new File(modFolder, "map/default.map"));
 						maxMapX = Integer
-								.parseInt(defaultMapFile.getRootNode().getChildByIdentifier("width").getValue());
+								.parseInt(defaultMapFile.getChildByIdentifier("width").getValue());
 						maxMapY = Integer
-								.parseInt(defaultMapFile.getRootNode().getChildByIdentifier("height").getValue());
+								.parseInt(defaultMapFile.getChildByIdentifier("height").getValue());
 					}
 				}
 
@@ -338,7 +338,7 @@ public class EU4PositionModifier {
 						}
 						ParadoxScriptFile positionsFile = new ParadoxScriptFile(
 								new File(modFolder, "map/positions.txt"));
-						for (ParadoxScriptNode province : positionsFile.getRootNode().getChildren()) {
+						for (ParadoxScriptNode province : positionsFile.getChildren()) {
 							ParadoxScriptNode positions = province.getChildByIdentifier("position");
 							if (positions.getChildren().size() != 14) {
 								updateStatus("ERROR: Malformed positions entry for " + province.getIdentifier());
@@ -360,7 +360,7 @@ public class EU4PositionModifier {
 						}
 						for (File f : new File(modFolder, "common/tradenodes").listFiles()) {
 							ParadoxScriptFile tradeNodesFile = new ParadoxScriptFile(f);
-							for (ParadoxScriptNode node : tradeNodesFile.getRootNode().getChildren()) {
+							for (ParadoxScriptNode node : tradeNodesFile.getChildren()) {
 								for (ParadoxScriptNode outgoing : node.getChildrenByIdentifier("outgoing")) {
 									ParadoxScriptNode control = outgoing.getChildByIdentifier("control");
 									processXYPositions(control, xOffset, maxMapX, yOffset, maxMapY, operation);
@@ -381,7 +381,7 @@ public class EU4PositionModifier {
 						}
 						ParadoxScriptFile ambientObjectsFile = new ParadoxScriptFile(
 								new File(modFolder, "map/ambient_object.txt"));
-						for (ParadoxScriptNode node : ambientObjectsFile.getRootNode().getChildren()) {
+						for (ParadoxScriptNode node : ambientObjectsFile.getChildren()) {
 							for (ParadoxScriptNode object : node.getChildrenByIdentifier("object")) {
 
 								// Extract all the current position values
@@ -431,7 +431,7 @@ public class EU4PositionModifier {
 						}
 						for (File f : new File(modFolder, "map/lakes").listFiles()) {
 							ParadoxScriptFile lakesFile = new ParadoxScriptFile(f);
-							for (ParadoxScriptNode lake : lakesFile.getRootNode().getChildrenByIdentifier("lake")) {
+							for (ParadoxScriptNode lake : lakesFile.getChildrenByIdentifier("lake")) {
 								ParadoxScriptNode triangle_strip = lake.getChildByIdentifier("triangle_strip");
 								processXYPositions(triangle_strip, xOffset, maxMapX, yOffset, maxMapY, operation);
 //								float height = Float.parseFloat(lake.getChildByIdentifier("height").getValue());
