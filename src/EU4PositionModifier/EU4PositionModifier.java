@@ -359,6 +359,7 @@ public class EU4PositionModifier {
 
 				// Process Positions
 				if (positionsCheckbox.isSelected()) {
+					final int REQUIRED_NUM_OF_POSITION_ENTRIES = 14;
 					if (new File(modFolder, "map/positions.txt").exists()) {
 						if (saveMethod == SAVE_METHOD.SEPARATE_OUTPUT_FOLDER) {
 							new File(outputFolder, "map").mkdir();
@@ -367,7 +368,7 @@ public class EU4PositionModifier {
 								new File(modFolder, "map/positions.txt"), fileEncoding);
 						for (ParadoxScriptNode province : positionsFile.getChildren()) {
 							ParadoxScriptNode positions = province.getChildByIdentifier("position");
-							if (positions.getChildren().size() != 14) {
+							if (positions.getChildren().size() != REQUIRED_NUM_OF_POSITION_ENTRIES) {
 								updateStatus("ERROR: Malformed positions entry for " + province.getIdentifier());
 							} else {
 								processXYPositions(positions, xOffset, maxMapX, yOffset, maxMapY, operation);
