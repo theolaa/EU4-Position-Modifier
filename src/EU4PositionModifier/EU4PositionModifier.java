@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -55,6 +56,7 @@ public class EU4PositionModifier {
 	public static String modName;
 	public static final String defaultOutputDirectory = new File(
 			System.getProperty("user.home") + "/Desktop/PDXSP Output/").toString();
+	private static String fileEncoding = "UTF8";
 
 	public static void main(String[] args) {
 		String gameName;
@@ -109,7 +111,8 @@ public class EU4PositionModifier {
 			} else {
 				value = modifyValue(value, yOffset, maxMapY, operation);
 			}
-			valueNode.setIdentifier(String.format("%.3f", value));
+			/*TODO Force '.' as decimal separator so some users don't get 1,000 instead of 1.000*/ 
+			valueNode.setIdentifier(String.format(Locale.CANADA, "%.3f", value));
 		}
 	}
 
@@ -247,6 +250,22 @@ public class EU4PositionModifier {
 		JCheckBox tradeNodesCheckbox = new JCheckBox("Trade Nodes", true);
 		JCheckBox ambientObjectsCheckbox = new JCheckBox("Ambient Objects", true);
 		JCheckBox lakesCheckbox = new JCheckBox("Lakes", true);
+		
+		JLabel loadFilesAs = new JLabel("Load files as: ");
+		JComboBox<String> selectFileLoadEncoding = new JComboBox<String>(
+				new String[] { "UTF-8", "ANSI (Windows-1252)"});
+		selectFileLoadEncoding.setSelectedIndex(0);
+		selectFileLoadEncoding.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// Save to output folder
+				if (selectFileLoadEncoding.getSelectedIndex() == 0) {
+					fileEncoding = "UTF8";
+				} else {
+					fileEncoding = "Cp1252";
+				}
+			}
+		});
 
 		JLabel offsetSettingsLabel = new JLabel("Adjust Positions By: ");
 		JPanel offsetSettingsArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -322,7 +341,7 @@ public class EU4PositionModifier {
 						return;
 					} else {
 						ParadoxScriptFile defaultMapFile = new ParadoxScriptFile(
-								new File(modFolder, "map/default.map"));
+								new File(modFolder, "map/default.map"), fileEncoding);
 						maxMapX = Integer
 								.parseInt(defaultMapFile.getChildByIdentifier("width").getValue());
 						maxMapY = Integer
@@ -337,7 +356,7 @@ public class EU4PositionModifier {
 							new File(outputFolder, "map").mkdir();
 						}
 						ParadoxScriptFile positionsFile = new ParadoxScriptFile(
-								new File(modFolder, "map/positions.txt"));
+								new File(modFolder, "map/positions.txt"), fileEncoding);
 						for (ParadoxScriptNode province : positionsFile.getChildren()) {
 							ParadoxScriptNode positions = province.getChildByIdentifier("position");
 							if (positions.getChildren().size() != 14) {
@@ -359,7 +378,7 @@ public class EU4PositionModifier {
 							new File(outputFolder, "common/tradenodes").mkdirs();
 						}
 						for (File f : new File(modFolder, "common/tradenodes").listFiles()) {
-							ParadoxScriptFile tradeNodesFile = new ParadoxScriptFile(f);
+							ParadoxScriptFile tradeNodesFile = new ParadoxScriptFile(f, fileEncoding);
 							for (ParadoxScriptNode node : tradeNodesFile.getChildren()) {
 								for (ParadoxScriptNode outgoing : node.getChildrenByIdentifier("outgoing")) {
 									ParadoxScriptNode control = outgoing.getChildByIdentifier("control");
@@ -380,7 +399,7 @@ public class EU4PositionModifier {
 							new File(outputFolder, "map").mkdir();
 						}
 						ParadoxScriptFile ambientObjectsFile = new ParadoxScriptFile(
-								new File(modFolder, "map/ambient_object.txt"));
+								new File(modFolder, "map/ambient_object.txt"), fileEncoding);
 						for (ParadoxScriptNode node : ambientObjectsFile.getChildren()) {
 							for (ParadoxScriptNode object : node.getChildrenByIdentifier("object")) {
 
@@ -430,7 +449,7 @@ public class EU4PositionModifier {
 							new File(outputFolder, "map/lakes").mkdirs();
 						}
 						for (File f : new File(modFolder, "map/lakes").listFiles()) {
-							ParadoxScriptFile lakesFile = new ParadoxScriptFile(f);
+							ParadoxScriptFile lakesFile = new ParadoxScriptFile(f, fileEncoding);
 							for (ParadoxScriptNode lake : lakesFile.getChildrenByIdentifier("lake")) {
 								ParadoxScriptNode triangle_strip = lake.getChildByIdentifier("triangle_strip");
 								processXYPositions(triangle_strip, xOffset, maxMapX, yOffset, maxMapY, operation);
@@ -537,11 +556,22 @@ public class EU4PositionModifier {
 		c.gridy = 4;
 		c.weightx = 1;
 		topbar.add(filesToEditxArea, c);
-
-		// Offset Settings
+		
+		// Load files as
 		c.weightx = 0;
 		c.gridx = 0;
 		c.gridy = 5;
+		topbar.add(loadFilesAs, c);
+		
+		c.gridx = 1;
+		c.gridy = 5;
+		c.weightx = 1;
+		topbar.add(selectFileLoadEncoding, c);
+		
+		// Offset Settings
+		c.weightx = 0;
+		c.gridx = 0;
+		c.gridy = 6;
 		topbar.add(offsetSettingsLabel, c);
 
 		// Labels and Spinners
@@ -555,13 +585,13 @@ public class EU4PositionModifier {
 		offsetSettingsArea.add(selectOperation);
 		offsetSettingsArea.add(wrapOutOfBounds);
 		c.gridx = 1;
-		c.gridy = 5;
+		c.gridy = 6;
 		c.weightx = 1;
 		topbar.add(offsetSettingsArea, c);
 
 		// Add Start Button
 		c.gridx = 0;
-		c.gridy = 6;
+		c.gridy = 7;
 		c.weightx = 1;
 		c.gridwidth = 3;
 		topbar.add(startButton, c);
