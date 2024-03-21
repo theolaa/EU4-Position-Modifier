@@ -169,7 +169,9 @@ public class EU4PositionModifier {
 
 		// Select Mod Section
 		JLabel selectModLabel = new JLabel("Select Mod: ");
+		selectModLabel.setToolTipText("Choose which mod you are adjusting positions for");
 		JComboBox<ComboBoxOption> selectMod = new JComboBox<ComboBoxOption>(getModPaths());
+		selectMod.setToolTipText("Choose which mod you are adjusting positions for");
 		status.setText("");
 		ComboBoxOption selectedOption = (ComboBoxOption) selectMod.getSelectedItem();
 		updateStatus("Selected mod: " + selectedOption.getDisplayName() + "\nFolder: mod/" + selectedOption.getValue());
@@ -231,8 +233,10 @@ public class EU4PositionModifier {
 		}
 
 		JLabel saveMethodLabel = new JLabel("Save Method: ");
+		saveMethodLabel.setToolTipText("Choose the save method you wish to use:\n- Overwrite: Directly overwrites the selected files\n- Overwrite with backup: Directly overwrites the selected files, but also leaves a copy of the old file prepended with \"~\" as a backup.\n- Separate output folder: Outputs to a separate folder of your choosing (defaults to a folder on your Desktop) so you can non-destructively verify the output. This is the default option.");
 		JComboBox<String> selectSaveMethod = new JComboBox<String>(
 				new String[] { "Overwrite", "Overwrite with backup", "Separate output folder" });
+		selectSaveMethod.setToolTipText("Choose the save method you wish to use:\n- Overwrite: Directly overwrites the selected files\n- Overwrite with backup: Directly overwrites the selected files, but also leaves a copy of the old file prepended with \"~\" as a backup.\n- Separate output folder: Outputs to a separate folder of your choosing (defaults to a folder on your Desktop) so you can non-destructively verify the output. This is the default option.");
 		selectSaveMethod.setSelectedIndex(2);
 		selectSaveMethod.addActionListener(new ActionListener() {
 			@Override
@@ -489,6 +493,7 @@ public class EU4PositionModifier {
 		JPanel infoArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel infoLabel = new JLabel("A tool by theolaa");
 		JButton infoButton = new JButton("View Instructions");
+		infoButton.setToolTipText("View instructions online");
 		infoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
