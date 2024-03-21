@@ -369,7 +369,7 @@ public class EU4PositionModifier {
 						for (ParadoxScriptNode province : positionsFile.getChildren()) {
 							ParadoxScriptNode positions = province.getChildByIdentifier("position");
 							if (positions.getChildren().size() != REQUIRED_NUM_OF_POSITION_ENTRIES) {
-								updateStatus("ERROR: Malformed positions entry for " + province.getIdentifier());
+								updateStatus("ERROR: Malformed positions entry for province " + province.getIdentifier());
 							} else {
 								processXYPositions(positions, xOffset, maxMapX, yOffset, maxMapY, operation);
 							}
@@ -555,7 +555,7 @@ public class EU4PositionModifier {
 		c.weightx = 0;
 		c.gridx = 0;
 		c.gridy = 4;
-		topbar.add(filesToEditLabel, c);
+		topbar.add(filesToEditLabel, c);		
 
 		// Add Checkboxes
 		filesToEditxArea.add(positionsCheckbox);
