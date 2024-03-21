@@ -42,6 +42,10 @@ public class EU4PositionModifier {
 	private static enum Operation {
 		SHIFT, SCALE
 	}
+	
+	private static enum SAVE_METHOD {
+		DIRECT, DIRECT_WITH_BACKUP, SEPARATE_OUTPUT_FOLDER
+	}
 
 	private static JFrame f = new JFrame();
 	private static GridBagConstraints c = new GridBagConstraints();
@@ -135,15 +139,15 @@ public class EU4PositionModifier {
 		}
 	}
 
-	static void saveFile(ParadoxScriptFile f, int saveMethod, File outputFolder) {
+	static void saveFile(ParadoxScriptFile f, SAVE_METHOD saveMethod, File outputFolder) {
 		switch (saveMethod) {
-		case 0:
+		case DIRECT:
 			f.saveDirect();
 			break;
-		case 1:
+		case DIRECT_WITH_BACKUP:
 			f.saveDirectWithBackup();
 			break;
-		case 2:
+		case SEPARATE_OUTPUT_FOLDER:
 			f.saveToSeparateFolder(outputFolder);
 			break;
 		default:
@@ -310,12 +314,12 @@ public class EU4PositionModifier {
 			public void actionPerformed(ActionEvent arg0) {
 				long startTime = System.currentTimeMillis();
 
-				int saveMethod = selectSaveMethod.getSelectedIndex();
+				SAVE_METHOD saveMethod = SAVE_METHOD.values()[selectSaveMethod.getSelectedIndex()];
 
 				modFolder = new File(inputFolder, ((ComboBoxOption) selectMod.getSelectedItem()).getValue());
 				outputFolder = new File(selectOutputDirectory.getText());
 				emptyFolder(outputFolder);
-				if (saveMethod == 2) {
+				if (saveMethod == SAVE_METHOD.SEPARATE_OUTPUT_FOLDER) {
 					outputFolder.mkdir();
 					openOutputDirectory.setEnabled(true);
 				}
@@ -352,7 +356,7 @@ public class EU4PositionModifier {
 				// Process Positions
 				if (positionsCheckbox.isSelected()) {
 					if (new File(modFolder, "map/positions.txt").exists()) {
-						if (saveMethod == 2) {
+						if (saveMethod == SAVE_METHOD.SEPARATE_OUTPUT_FOLDER) {
 							new File(outputFolder, "map").mkdir();
 						}
 						ParadoxScriptFile positionsFile = new ParadoxScriptFile(
@@ -374,7 +378,7 @@ public class EU4PositionModifier {
 				// Process Trade Nodes
 				if (tradeNodesCheckbox.isSelected()) {
 					if (new File(modFolder, "common/tradenodes").exists()) {
-						if (saveMethod == 2) {
+						if (saveMethod == SAVE_METHOD.SEPARATE_OUTPUT_FOLDER) {
 							new File(outputFolder, "common/tradenodes").mkdirs();
 						}
 						for (File f : new File(modFolder, "common/tradenodes").listFiles()) {
@@ -395,7 +399,7 @@ public class EU4PositionModifier {
 				// Process Ambient Objects
 				if (ambientObjectsCheckbox.isSelected()) {
 					if (new File(modFolder, "map/ambient_object.txt").exists()) {
-						if (saveMethod == 2) {
+						if (saveMethod == SAVE_METHOD.SEPARATE_OUTPUT_FOLDER) {
 							new File(outputFolder, "map").mkdir();
 						}
 						ParadoxScriptFile ambientObjectsFile = new ParadoxScriptFile(
@@ -445,7 +449,7 @@ public class EU4PositionModifier {
 				// Process Lakes
 				if (lakesCheckbox.isSelected()) {
 					if (new File(modFolder, "map/lakes").exists()) {
-						if (saveMethod == 2) {
+						if (saveMethod == SAVE_METHOD.SEPARATE_OUTPUT_FOLDER) {
 							new File(outputFolder, "map/lakes").mkdirs();
 						}
 						for (File f : new File(modFolder, "map/lakes").listFiles()) {
